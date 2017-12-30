@@ -1,14 +1,14 @@
 import sklearn
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.pipeline import Pipeline
+from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.cross_validation import train_test_split
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
-from sklearn.svm import SVC
+from sklearn.svm import SVC, LinearSVC
 
 
 def main():
     #read documents
-    document = open('training/data-all.txt', 'r').read().split("END\n")
+    document = open('training/data-spanish.txt', 'r', encoding="utf-8").read().split("END\n")
 
     trainDocuments, testDocuments = train_test_split(document, test_size=0.2, random_state=42)
 
@@ -38,16 +38,25 @@ def identity(x):
 def classify(train_tweets, train_ages):
     #('preprocessor', CustomPreprocessor()),
 
-    vec = TfidfVectorizer(preprocessor = identity,
+    vec_word = TfidfVectorizer(preprocessor = identity,
                          tokenizer = identity,
                          binary=True,
                          lowercase=False, 
                          analyzer='word', 
                          ngram_range=(1,2))
 
+    vec_char = TfidfVectorizer(preprocessor = identity,
+                         tokenizer = identity,
+                         binary=True,
+                         lowercase=False, 
+                         analyzer='char', 
+                         ngram_range=(3,5))
 
-    classifier = Pipeline([('vec', vec),
-                            ('classifier', SVC())])
+    combined_feats = FeatureUnion([("vec_word", vec_word), ("vec_char", vec_char)])
+
+
+    classifier = Pipeline([('vec', combined_feats),
+                            ('classifier', SVC(kernel="linear"))])
     
 
     classifier.fit(train_tweets, train_ages)  
