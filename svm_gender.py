@@ -8,7 +8,7 @@ from sklearn.svm import SVC, LinearSVC
 
 def main():
     #read documents
-    document = open('training/data-dutch.txt', 'r', encoding="utf-8").read().split("END\n")
+    document = open('training/data-dutch-preprocessed.txt', 'r', encoding="utf-8").read().split("END\n")
 
     trainDocuments, testDocuments = train_test_split(document, test_size=0.2, random_state=42)
 
@@ -38,24 +38,25 @@ def identity(x):
 def classify(train_tweets, train_genders):
     #('preprocessor', CustomPreprocessor()),
 
-    vec = TfidfVectorizer(preprocessor = identity,
+    vec_word = TfidfVectorizer(preprocessor = identity,
                          tokenizer = identity,
                          binary=True,
                          lowercase=False, 
                          analyzer='word', 
                          ngram_range=(1,2))
 
-    # vec_char = TfidfVectorizer(preprocessor = identity,
-    #                      tokenizer = identity,
-    #                      binary=True,
-    #                      lowercase=False, 
-    #                      analyzer='char', 
-    #                      ngram_range=(3,5))
+    vec_char = TfidfVectorizer(preprocessor = identity,
+                         tokenizer = identity,
+                         binary=True,
+                         lowercase=False, 
+                         analyzer='char', 
+                         ngram_range=(3,5))
 
 
-    # combined_feats = FeatureUnion([("vec_word", vec_word), ("vec_char", vec_char)])
-    classifier = Pipeline([('vec', vec),
-                            ('classifier', SVC(kernel="linear"))])
+    combined_feats = FeatureUnion([("vec_word", vec_word), ("vec_char", vec_char)])
+
+    classifier = Pipeline([('vec', combined_feats),
+                            ('classifier', SVC(C=1, kernel="linear"))])
 
     
 
