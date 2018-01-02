@@ -39,6 +39,8 @@ AGE: <br/>
 With preprocessing + C=10: <br/>
 GENDER: 0.773 <br/>
 
+# -------------------------
+
 # All Languages
 Using LinearSVC with default parameters <br/>
 (reported are the acc scores) <br/>
@@ -50,6 +52,23 @@ Lemmatizing = 0.7328 <br/>
 Stemming = 0.7376 <br/>
 Stemming + Lemmatizing = 0.7376 <br/>
 
+### Changing tf-idf vectorizer values
+What does not work: <br/>
+- binary = False <br/>
+- lowercase = True (does not improve nor decline) <br/>
+- strip_accents (does not improve for both ascii and unicode) <br/>
+- removing stopwords <br/>
+- min_df <br/>
+- norm <br/>
+- sublinear_tf <br/> <br/><br/>
+- max_features
+
+### Changing classifier parameters
+What does not work: <br/>
+- penalty <br/>
+- multi_class <br/>
+---------------------------- <br/><br/>
+
 ##  Age
 TweetTokenizer = 0.7383 <br/>
 POStagging = 0.7344 (removed) <br/>
@@ -58,6 +77,9 @@ Stemming = 0.7383 <br/>
 Stemming + Lemmatizing = 0.7383 <br/>
 
 ### Changing tf-idf vectorizer values
+What does work: <br/>
+- max_features = 400.000 --> 0.7387 <br/> <br/>
+
 What does not work: <br/>
 - binary = False <br/>
 - lowercase = True (does not improve nor decline) <br/>
@@ -67,12 +89,7 @@ What does not work: <br/>
 - norm <br/>
 - sublinear_tf <br/> <br/>
 
-What does work: <br/>
-- max_features = 400.000 --> 0.7387 <br/> <br/>
-
 ### Changing classifier parameters
 What does not work: <br/>
 - penalty <br/>
 - multi_class <br/>
-
-What does work:
