@@ -72,9 +72,9 @@ What does not work: <br/>
 ##  Age
 TweetTokenizer = 0.7383 <br/>
 POStagging = 0.7344 (removed) <br/>
-Lemmatizing = 0.7383 <br/>
-Stemming = 0.7383 <br/>
-Stemming + Lemmatizing = 0.7383 <br/>
+Lemmatizing = 0.7387 <br/>
+Stemming = 0.7385 <br/>
+Stemming + Lemmatizing = 0.7385 <br/>
 
 ### Changing tf-idf vectorizer values
 What does work: <br/>
