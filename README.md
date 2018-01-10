@@ -93,3 +93,29 @@ What does not work: <br/>
 What does not work: <br/>
 - penalty <br/>
 - multi_class <br/>
+
+
+# ----------------
+
+## Checking other classifiers (just to be sure) on ALL DATA
+
+### Gender
+* all classifiers are default ones + stemmer/lemmatizer and tweettokenizer
+- Multinomial Naive Bayes: 0.71
+- Bernoulli Naive Bayes: 0.717
+- Random Forest Classifier: 0.667
+- Adaboost Classifier: 0.655
+- Decision Tree: 0.62
+- KNN: 0.676
+
+### Age
+* all classifiers are default ones + stemmer/lemmatizer and tweettokenizer
+- Multinomial Naive Bayes: 0.64
+- Bernoulli NB: 0.645
+- Random Forest Classifier: 0.624
+- Adaboost Classifier: 0.55
+- Decision Tree: 0.55
+- KNN: 0.65
+
+- MLPclassifier is still running (after more than an hour). Might stop it if it still runs in 1 hour.
+- We could potentially have a look at some Naive Bayes classifiers and tune those or just add more/different features to SVM or train neural nets.

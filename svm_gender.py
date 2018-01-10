@@ -4,6 +4,11 @@ from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.cross_validation import train_test_split
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.svm import SVC, LinearSVC
+from sklearn.naive_bayes import MultinomialNB, BernoulliNB
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.neighbors import KNeighborsClassifier
 import time
 
 import nltk
@@ -86,7 +91,6 @@ def classify(train_tweets, train_genders):
                             ('classifier', LinearSVC(multi_class='crammer_singer'))])
 
     
-
     classifier.fit(train_tweets, train_genders)  
     return classifier
 
