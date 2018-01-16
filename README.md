@@ -51,6 +51,7 @@ POStagging = 0.7301 (removed) <br/>
 Lemmatizing = 0.7328 <br/>
 Stemming = 0.7376 <br/>
 Stemming + Lemmatizing = 0.7376 <br/>
+Adding Text length (DictVectorizer) from lab = 0.718 (removed) <br/>
 
 ### Changing tf-idf vectorizer values
 What does not work: <br/>
@@ -75,6 +76,7 @@ POStagging = 0.7344 (removed) <br/>
 Lemmatizing = 0.7387 <br/>
 Stemming = 0.7385 <br/>
 Stemming + Lemmatizing = 0.7385 <br/>
+Adding Text length (DictVectorizer) from lab = 0.690 (removed) <br/>
 
 ### Changing tf-idf vectorizer values
 What does work: <br/>

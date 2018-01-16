@@ -1,5 +1,5 @@
 import sklearn
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.cross_validation import train_test_split
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
@@ -16,6 +16,12 @@ from nltk.tokenize import TweetTokenizer
 from nltk.stem import WordNetLemmatizer 
 from nltk.stem import SnowballStemmer, PorterStemmer, LancasterStemmer
 from nltk.corpus import stopwords as sw
+
+
+
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.feature_extraction import DictVectorizer
+
 
 def main():
     t0 = time.time() #added to see the total duration of the program
