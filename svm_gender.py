@@ -27,7 +27,7 @@ def main():
     t0 = time.time() #added to see the total duration of the program
 
     #read documents
-    document = open('training/data-dutch-preprocessed.txt', 'r', encoding="utf-8").read().split("END\n")
+    document = open('training/data-all-preprocessed.txt', 'r', encoding="utf-8").read().split("END\n")
 
     trainDocuments, testDocuments = train_test_split(document, test_size=0.2, random_state=42)
 

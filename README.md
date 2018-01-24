@@ -52,6 +52,7 @@ Lemmatizing = 0.7328 <br/>
 Stemming = 0.7376 <br/>
 Stemming + Lemmatizing = 0.7376 <br/>
 Adding Text length (DictVectorizer) from lab = 0.718 (removed) <br/>
+Adding stereotypical linguistic features: 0.734 (all of them) > took very long > maybe still worth it to check them one by one?
 
 ### Changing tf-idf vectorizer values
 What does not work: <br/>
