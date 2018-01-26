@@ -53,6 +53,10 @@ Stemming = 0.7376 <br/>
 Stemming + Lemmatizing = 0.7376 <br/>
 Adding Text length (DictVectorizer) from lab = 0.718 (removed) <br/>
 Adding stereotypical linguistic features: 0.734 (all of them) > took very long > maybe still worth it to check them one by one?
+	Only 'questions' = 0.735 (duration: 537 seconds)
+	Only 'tag-questions' = 0.736 (duration: 484 seconds)
+	Only 'apologetic_lang' = 0.736 (duration: 508 seconds)
+	Only 'exclamation' = 0.736 (duration: 933 seconds)
 
 ### Changing tf-idf vectorizer values
 What does not work: <br/>
