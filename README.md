@@ -58,7 +58,7 @@ Adding stereotypical linguistic features: 0.734 (all of them) > took very long >
 	&emsp;&emsp;Only 'exclamation' = 0.736 (duration: 933 seconds)<br/>
 	&emsp;&emsp;Only 'adverb' = 0.736 (duration: 341 seconds)<br/>
 	&emsp;&emsp;Only 'adjectives' = 0.733 (duration: 2825 seconds)<br/>
-	&emsp;&emsp;Only 'unique_words'= 0. (duration:  seconds)<br/>
+	&emsp;&emsp;Only 'unique_words'= 0.735 (duration: 7215 seconds)<br/>
 
 ### Changing tf-idf vectorizer values
 What does not work: <br/>
