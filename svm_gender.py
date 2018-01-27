@@ -1,5 +1,5 @@
 import sklearn
-from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer, HashingVectorizer
 from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.cross_validation import train_test_split
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
@@ -22,35 +22,78 @@ from collections import Counter
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.feature_extraction import DictVectorizer
 
+import numpy as np
+
+from keras.models import Sequential
+from keras.layers import Dense, Dropout, Embedding, Flatten, Conv1D
+from keras.layers import LSTM
+from keras.preprocessing import sequence
+from keras.preprocessing.text import Tokenizer
+
 
 def main():
     t0 = time.time() #added to see the total duration of the program
 
     #read documents
     document = open('training/data-all-preprocessed.txt', 'r', encoding="utf-8").read().split("END\n")
+    svm = False
 
-    trainDocuments, testDocuments = train_test_split(document, test_size=0.2, random_state=42)
+    if svm:
 
-    #create seperate lists for tweets and the genders
-    train_tweets, train_genders = createLists(trainDocuments)
-    test_tweets, test_genders = createLists(testDocuments)
+        trainDocuments, testDocuments = train_test_split(document, test_size=0.2, random_state=42)
+
+        #create seperate lists for tweets and the genders
+        train_tweets, train_genders = createLists(trainDocuments)
+        test_tweets, test_genders = createLists(testDocuments)
+
+        
+        classifier = classify(train_tweets, train_genders)
+
+        predicted_genders = classifier.predict(test_tweets)
     
-    classifier = classify(train_tweets, train_genders)
+        accuracy = accuracy_score(test_genders, predicted_genders)
+        print("\nAccuracy: ", accuracy)
+
+        
+        metricsPerClass = classification_report(test_genders, predicted_genders)
+        print("\nMetrics per class:\n",metricsPerClass)
+
+        total_time = time.time() - t0
+        print("total time Gender: ", total_time)
+        
+        confusionMatrix = sklearn.metrics.confusion_matrix(test_genders, predicted_genders)
+    else:
+        trainDocuments, testDocuments = train_test_split(document, test_size=0.2, random_state=42)
+        #create seperate lists for tweets and the genders
+        train_tweets, train_genders = createLists(trainDocuments)
+        test_tweets, test_genders = createLists(testDocuments)
+        tokenizer = Tokenizer()
+        tokenizer.fit_on_texts(train_tweets+test_tweets)
+        X = tokenizer.texts_to_sequences(train_tweets+test_tweets)
+        X_train = X[:int(len(X)*0.8)]
+        X_test = X[int(len(X)*0.8):]
+        X_train = sequence.pad_sequences(X_train, maxlen=120)
+        X_testn = sequence.pad_sequences(X_test, maxlen=120)
+        total_words = 5000
+        max_length = 120
+        embedding_vector_length = 32
+
+        classifier = classify_lstm(X_train, train_genders, total_words, max_length, embedding_vector_length, 500, 0.2, "relu")
 
 
-    predicted_genders = classifier.predict(test_tweets)
-    
-    accuracy = accuracy_score(test_genders, predicted_genders)
-    print("\nAccuracy: ", accuracy)
+        predicted_genders = classifier.predict(X_test)
+        
+        accuracy = accuracy_score(test_genders, predicted_genders)
+        print("\nAccuracy: ", accuracy)
 
-    
-    metricsPerClass = classification_report(test_genders, predicted_genders)
-    print("\nMetrics per class:\n",metricsPerClass)
+        
+        metricsPerClass = classification_report(test_genders, predicted_genders)
+        print("\nMetrics per class:\n",metricsPerClass)
 
-    total_time = time.time() - t0
-    print("total time Gender: ", total_time)
-    
-    # confusionMatrix = sklearn.metrics.confusion_matrix(test_genders, predicted_genders)
+        total_time = time.time() - t0
+        print("total time Gender: ", total_time)
+        
+        # confusionMatrix = sklearn.metrics.confusion_matrix(test_genders, predicted_genders)
     
     
 def identity(x):
@@ -70,6 +113,20 @@ def customLemmatizer(arg):
     wnl = WordNetLemmatizer()
     st = LancasterStemmer()
     return st.stem(wnl.lemmatize(arg))
+
+def classify_lstm(train_X, train_Y, total_words, max_len, emb_vec_len, nodes, dropout, lstm_activation):
+    train_X = train_X.reshape(len(train_X), 1, len(train_X[0]))
+    #dev_X = dev_X.reshape((len(dev_X), 1, len(dev_X[0])))
+    model = Sequential()
+    #model.add(Embedding(total_words, emb_vec_len, input_length=max_len))
+    model.add(LSTM(nodes, input_shape=(len(train_X[0]), len(train_X[0][0])), dropout=dropout, recurrent_dropout=dropout, return_sequences=True, activation=lstm_activation))  
+    model.add(LSTM(nodes, dropout=dropout, recurrent_dropout=dropout, activation=lstm_activation)) 
+    model.add(Dense(int(nodes/2), activation="relu"))
+    model.add(Dense(int(nodes/4), activation="relu"))
+    model.add(Dense(1, activation='sigmoid'))                       
+    model.compile(loss='mse', optimizer="adam", metrics=['mse']) 
+    
+    return model
 
 
 def classify(train_tweets, train_genders):
@@ -107,31 +164,29 @@ def classify(train_tweets, train_genders):
     classifier.fit(train_tweets, train_genders)  
     return classifier
 
+ 
 class LinguisticGenderFeatures(BaseEstimator, TransformerMixin):
     def fit(self, x, y=None):
         return self
     def _get_features(self, doc):
-        # if language == "english":
-        #     diminutives = ["ie"]
-        # elif language == "spanish":
-        #     diminutives = ["ito", "ita", "ico", "ica"]
-        # elif language == "italian":
-        #     diminutives = ["ino", "ina", "etto", "etta", "uolo", "uola", "ucolo", "ucola"]
-        # elif language == "dutch":
-        #     diminutives = ["tje", "gje", "sje", "pje", "kje"]
         counts = Counter(doc)
         text_string = " ".join(doc)
         pos_tagged_text = nltk.pos_tag(doc)
         apologetic_words = ["sorry", "scusa", "scusi", "colpa", "excuus", "spijt", "siento", "culpa"]
         tag_questions = ["right?", "isn't it?", "aren't they?", "verdad?", "toch?", "giusto?", "vero?"]
-        return {"words": len(doc),
-                "unique_words": len(set(doc)),
-                "adjectives": len([word[1] for word in pos_tagged_text if word[1] == "JJ"]),
-                "adverbs": len([word[1] for word in pos_tagged_text if word[1] == "RB"]),
-                "exclamation": counts["!"],
-                "apologetic_lang": len([word for word in doc if word in apologetic_words]),
-                "tag_questions": len([tag for tag in tag_questions if tag in text_string]),
-                "questions": counts["?"]}
+        swearwords = ["shit", "crap", "fuck", "merda", "cazzo", "gvd", "kut", "mierda"]
+        return {
+                    "swearing": len([word for word in swearwords if word in doc])
+                    #"words": len(doc)
+                    # "unique_words": len(set(doc)),
+                    # "adjectives": len([word[1] for word in pos_tagged_text if word[1] == "JJ"]),
+                    # "adverbs": len([word[1] for word in pos_tagged_text if word[1] == "RB"]),
+                    # "exclamation": counts["!"],
+                    # "apologetic_lang": len([word for word in doc if word in apologetic_words]),
+                    # "tag_questions": len([tag for tag in tag_questions if tag in text_string]),
+                    # "questions": counts["?"]}
+                }
+       
     def transform(self, raw_documents):
      return [ self._get_features(doc) for doc in raw_documents]
 
