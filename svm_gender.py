@@ -24,27 +24,18 @@ from sklearn.feature_extraction import DictVectorizer
 
 import numpy as np
 
-from keras.models import Sequential
-from keras.layers.core import Dense, Activation
-from keras.layers import Dense, Dropout, Embedding, Flatten, Conv1D
-from keras.layers import LSTM
-from keras.preprocessing import sequence
-from keras.preprocessing.text import Tokenizer
-from keras.utils import to_categorical
-from keras.preprocessing.sequence import pad_sequences
-from sklearn.preprocessing import LabelBinarizer
 
 
 def main():
     t0 = time.time() #added to see the total duration of the program
 
     #read documents
-    document = open('training/data-all-preprocessed.txt', 'r', encoding="utf-8").read().split("END\n")
-    svm = False
+    document = open('training/data-dutch-preprocessed.txt', 'r', encoding="utf-8").read().split("END\n")
+    svm = True
 
     if svm:
 
-        trainDocuments, testDocuments = train_test_split(document, test_size=0.2, random_state=42)
+        trainDocuments, testDocuments = train_test_split(document, test_size=0.2, random_state=0)
 
         #create seperate lists for tweets and the genders
         train_tweets, train_genders = createLists(trainDocuments)
@@ -67,6 +58,18 @@ def main():
         
         confusionMatrix = sklearn.metrics.confusion_matrix(test_genders, predicted_genders)
     else:
+        #only import when running LSTM
+        from keras.models import Sequential
+        from keras.layers.core import Dense, Activation
+        from keras.layers import Dense, Dropout, Embedding, Flatten, Conv1D
+        from keras.layers import LSTM
+        from keras.preprocessing import sequence
+        from keras.preprocessing.text import Tokenizer
+        from keras.utils import to_categorical
+        from keras.preprocessing.sequence import pad_sequences
+        from sklearn.preprocessing import LabelBinarizer
+
+
         trainDocuments, testDocuments = train_test_split(document, test_size=0.2, random_state=42)
         #create seperate lists for tweets and the genders
         train_tweets, train_genders = createLists(trainDocuments)
