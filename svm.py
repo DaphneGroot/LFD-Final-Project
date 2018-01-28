@@ -22,17 +22,9 @@ import sys, re, os
 import xml.etree.ElementTree as ET
 from operator import itemgetter
 
-
 def main():
     t0 = time.time() #added to see the total duration of the program
 
-    # For developing
-    # directory = str(sys.argv[1])
-    # document = open('training/'+directory, 'r', encoding="utf-8").read().split()
-    # trainDocuments, testDocuments = train_test_split(document, test_size=0.2, random_state=0)
-
-
-    # For final training/testing split
     try:
         trainDirectory = str(sys.argv[1])
         testDirectory = str(sys.argv[2])
@@ -43,7 +35,6 @@ def main():
         goldPath = str(sys.argv[3])
     except:
         print("Please define the path to the gold-standard file (e.g. english/gold.txt), so accuracy, precision and recall over test-set can be calculated.")
-
 
     trainDocuments, testDocuments = createDocuments(trainDirectory,testDirectory)
 
@@ -71,7 +62,7 @@ def main():
 
 
     #write predictions to truth file
-    outFile = open(testDirectory+"/truthPredicted.txt","w+")
+    outFile = open(testDirectory+"/truth.txt","w+")
     
     userDictGender = {}
     userDictAge = {}
@@ -98,7 +89,7 @@ def main():
 
     # Calculate metrics
     goldFile = open(goldPath,"r+").read().split("\n")
-    predictedFile = open(testDirectory+"/truthPredicted.txt","r+").read().split("\n")
+    predictedFile = open(testDirectory+"/truth.txt","r+").read().split("\n")
 
     goldFile = [line.split(":::")[:3] for line in goldFile if line]
     goldFile = sorted(goldFile, key=itemgetter(0))
