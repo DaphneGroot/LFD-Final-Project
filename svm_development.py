@@ -106,28 +106,31 @@ def main():
     accuracyGender = accuracy_score(goldGenders, predictedGenders)
     metricsPerClassGender = classification_report(goldGenders, predictedGenders)
     confusionMatrixGender = sklearn.metrics.confusion_matrix(goldGenders, predictedGenders)
-    print("\nGender:\nAccuracy = ", accuracyGender)
+    print("\n\n"+'\033[95m'+"Gender"+'\033[0m'+":\nAccuracy = ", accuracyGender)
     print(metricsPerClassGender)
-    print(confusionMatrixGender)
+    createConfusionMatrix(confusionMatrixGender, "gender", language)
+    # print(confusionMatrixGender)
 
     #Age
     accuracyAge = accuracy_score(goldAges, predictedAges)
     metricsPerClassAge = classification_report(goldAges, predictedAges)
     confusionMatrixAge = sklearn.metrics.confusion_matrix(goldAges, predictedAges)
-    print("\nAge:\nAccuracy = ", accuracyAge)
+    print("\n\n"+'\033[95m'+"Age"+'\033[0m'+":\nAccuracy = ", accuracyAge)
     print(metricsPerClassAge)
-    print(confusionMatrixAge)
+    createConfusionMatrix(confusionMatrixAge, "age", language)
+    # print(confusionMatrixAge)
 
     #Gender+Age
     accuracyCombined = accuracy_score(goldCombined, predictedCombined)
     metricsPerClassCombined = classification_report(goldCombined, predictedCombined)
     confusionMatrixCombined = sklearn.metrics.confusion_matrix(goldCombined, predictedCombined)
-    print("\nCombined:\nAccuracy = ", accuracyCombined)
+    print("\n\n"+'\033[95m'+"Combined"+'\033[0m'+":\nAccuracy = ", accuracyCombined)
     print(metricsPerClassCombined)
-    print(confusionMatrixCombined)
+    createConfusionMatrix(confusionMatrixCombined, "combined", language)
+    # print(confusionMatrixCombined)
 
     total_time = time.time() - t0
-    print("total time: ", total_time)
+    print("\ntotal time: ", total_time)
     
 
     
@@ -355,9 +358,30 @@ def preprocessData(documents):
 
     return(documents)
 
+def createConfusionMatrix(confusionMatrix,part,language):
+    print()
+    if part == "gender":
+        labels = ['F','M']
+    elif part == "age":
+        if language == "spanish" or language =="english":
+            labels = ['18-24','25-34','35-49','50-XX']
+        else:
+            labels = ['XX-XX']
+    else:
+        if language == "spanish" or language =="english":
+            labels = ['18-24','25-34','35-49','50-XX','F','M']
+        else:
+            labels = ['XX-XX','F','M']
 
 
+    print("{:10s}".format(""), end="")
+    [print("{:<8s}".format(item), end="") for item in labels]
+    print()
 
+    for idx, elem in enumerate(confusionMatrix):
+        print("{:10s}".format(labels[idx]), end="")
+        [print("{:<8d}".format(el), end="") for el in elem]
+        print()
 
     
 if __name__ == '__main__':

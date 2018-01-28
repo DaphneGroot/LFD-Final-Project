@@ -30,11 +30,13 @@ def main():
         testDirectory = str(sys.argv[2])
     except:
         print("Please use python3 svm.py trainDirectory testDirectory (e.g. training/english testing/english)")
+        sys.exit(1)
 
     try:
         goldPath = str(sys.argv[3])
     except:
         print("Please define the path to the gold-standard file (e.g. english/gold.txt), so accuracy, precision and recall over test-set can be calculated.")
+        sys.exit(1)
 
     trainDocuments, testDocuments = createDocuments(trainDirectory,testDirectory)
 
@@ -51,8 +53,10 @@ def main():
     classifierGender = classifyGender(train_tweets, train_genders)
     predicted_genders = classifierGender.predict(test_tweets)
 
+    language = testDirectory.split("/")[-1]
+
     #only predict age for spanish and english
-    if testDirectory.split("/")[1] == "spanish" or testDirectory.split("/")[1] == "english":
+    if "spanish" in language or "english" in language:
         #predict age
         classifierAge = classifyAge(train_tweets, train_ages)
         predicted_ages = classifierAge.predict(test_tweets)
@@ -62,7 +66,7 @@ def main():
 
 
     #write predictions to truth file
-    outFile = open(testDirectory+"/truth.txt","w+")
+    outFile = open(testDirectory+"/truthPredicted.txt","w+")
     
     userDictGender = {}
     userDictAge = {}
@@ -89,7 +93,7 @@ def main():
 
     # Calculate metrics
     goldFile = open(goldPath,"r+").read().split("\n")
-    predictedFile = open(testDirectory+"/truth.txt","r+").read().split("\n")
+    predictedFile = open(testDirectory+"/truthPredicted.txt","r+").read().split("\n")
 
     goldFile = [line.split(":::")[:3] for line in goldFile if line]
     goldFile = sorted(goldFile, key=itemgetter(0))
@@ -110,28 +114,31 @@ def main():
     accuracyGender = accuracy_score(goldGenders, predictedGenders)
     metricsPerClassGender = classification_report(goldGenders, predictedGenders)
     confusionMatrixGender = sklearn.metrics.confusion_matrix(goldGenders, predictedGenders)
-    print("\nGender:\nAccuracy = ", accuracyGender)
+    print("\n\n"+'\033[95m'+"Gender"+'\033[0m'+":\nAccuracy = ", accuracyGender)
     print(metricsPerClassGender)
-    print(confusionMatrixGender)
+    createConfusionMatrix(confusionMatrixGender, "gender", language)
+    # print(confusionMatrixGender)
 
     #Age
     accuracyAge = accuracy_score(goldAges, predictedAges)
     metricsPerClassAge = classification_report(goldAges, predictedAges)
     confusionMatrixAge = sklearn.metrics.confusion_matrix(goldAges, predictedAges)
-    print("\nAge:\nAccuracy = ", accuracyAge)
+    print("\n\n"+'\033[95m'+"Age"+'\033[0m'+":\nAccuracy = ", accuracyAge)
     print(metricsPerClassAge)
-    print(confusionMatrixAge)
+    createConfusionMatrix(confusionMatrixAge, "age", language)
+    # print(confusionMatrixAge)
 
     #Gender+Age
     accuracyCombined = accuracy_score(goldCombined, predictedCombined)
     metricsPerClassCombined = classification_report(goldCombined, predictedCombined)
     confusionMatrixCombined = sklearn.metrics.confusion_matrix(goldCombined, predictedCombined)
-    print("\nCombined:\nAccuracy = ", accuracyCombined)
+    print("\n\n"+'\033[95m'+"Combined"+'\033[0m'+":\nAccuracy = ", accuracyCombined)
     print(metricsPerClassCombined)
-    print(confusionMatrixCombined)
+    createConfusionMatrix(confusionMatrixCombined, "combined", language)
+    # print(confusionMatrixCombined)
 
     total_time = time.time() - t0
-    print("total time: ", total_time)
+    print("\ntotal time: ", total_time)
     
 
     
@@ -359,9 +366,30 @@ def preprocessData(documents):
 
     return(documents)
 
+def createConfusionMatrix(confusionMatrix,part,language):
+    print()
+    if part == "gender":
+        labels = ['F','M']
+    elif part == "age":
+        if language == "spanish" or language =="english":
+            labels = ['18-24','25-34','35-49','50-XX']
+        else:
+            labels = ['XX-XX']
+    else:
+        if language == "spanish" or language =="english":
+            labels = ['18-24','25-34','35-49','50-XX','F','M']
+        else:
+            labels = ['XX-XX','F','M']
 
 
+    print("{:10s}".format(""), end="")
+    [print("{:<8s}".format(item), end="") for item in labels]
+    print()
 
+    for idx, elem in enumerate(confusionMatrix):
+        print("{:10s}".format(labels[idx]), end="")
+        [print("{:<8d}".format(el), end="") for el in elem]
+        print()
 
     
 if __name__ == '__main__':
