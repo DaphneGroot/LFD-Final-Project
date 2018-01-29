@@ -16,6 +16,7 @@ from collections import Counter
 
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.feature_extraction import DictVectorizer
+from sklearn.model_selection import KFold
 
 import numpy as np
 import sys, re, os
@@ -29,6 +30,7 @@ def main():
     language = str(sys.argv[1])
     files = os.listdir('training/'+language)
     files = [f for f in files if f[-4:] == ".xml"] #files in directory, minus all non .xml-files
+
 
     directorySize = len(files)
     trainingSize = round(0.8*directorySize)
@@ -67,7 +69,7 @@ def main():
     predictedAges = [mostFrequentAge for i in set(test_ids)]
     goldCombined = goldGenders + goldAges
     predictedCombined = predictedGenders + predictedAges
-    
+
 
     #Gender
     accuracyGender = accuracy_score(goldGenders, predictedGenders)
