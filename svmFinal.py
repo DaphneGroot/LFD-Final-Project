@@ -116,6 +116,7 @@ def main():
 
     if "spanish" in language or "english" in language:
         #Age
+        print("age")
         results(goldAges,predictedAges,"age",language)
 
         #Gender+Age
@@ -136,22 +137,34 @@ def results(gold,predicted,part,language):
     if part == "gender":
         print("\n\n"+'\033[95m'+"Gender"+'\033[0m'+":\nAccuracy = ", round(accuracy,3),"\n")
 
-        labelsGender = ["F","M"]
-        print("\t\t {} \t {} \t {}".format("Precision","Recall","F1-score"))
-        for label in labelsGender:
-            precisionScore  = sklearn.metrics.precision_score(gold,predicted, average="micro", labels=label)
-            recallScore     = sklearn.metrics.recall_score(gold,predicted, average="micro", labels=label)
-            f1Score         = sklearn.metrics.f1_score(gold,predicted, average="micro", labels=label)
+        labels = ["F","M"]
 
-            print("{} \t\t {} \t\t {} \t\t {}".format(label,round(precisionScore,3),round(recallScore,3),round(f1Score,3)))
+    elif part == "age":
+        print("\n\n"+'\033[95m'+"Age"+'\033[0m'+":\nAccuracy = ", round(accuracy,3),"\n")
+        labels = ["18-24","25-34","35-49","50-XX"]
 
-        print("\nAvg/total \t {} \t\t {} \t\t {}".format(round(precision,3),round(recall,3),round(f1,3)))
-
-        print("\nConfusion Matrix:")
-        createConfusionMatrix(confusionMatrix, "gender", language)
+    else:
+        print("\n\n"+'\033[95m'+"Combined"+'\033[0m'+":\nAccuracy = ", round(accuracy,3),"\n")
+        labels = ["18-24","25-34","35-49","50-XX","F","M"]
 
 
-    return accuracy, precision, recall, f1, confusionMatrix
+
+    print("\t\t {} \t {} \t {}".format("Precision","Recall","F1-score"))
+    for label in labels:
+        precisionScore  = sklearn.metrics.precision_score(gold,predicted, average="micro", labels=label)
+        recallScore     = sklearn.metrics.recall_score(gold,predicted, average="micro", labels=label)
+        f1Score         = sklearn.metrics.f1_score(gold,predicted, average="micro", labels=label)
+
+        print("{} \t\t {} \t\t {} \t\t {}".format(label,round(precisionScore,3),round(recallScore,3),round(f1Score,3)))
+
+    print("\nAvg/total \t {} \t\t {} \t\t {}".format(round(precision,3),round(recall,3),round(f1,3)))
+
+    print("\nConfusion Matrix:")
+    createConfusionMatrix(confusionMatrix, part, language)
+
+
+
+    # return accuracy, precision, recall, f1, confusionMatrix
 
     
 def identity(x):
