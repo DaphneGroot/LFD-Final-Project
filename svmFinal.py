@@ -204,12 +204,7 @@ def classifyGender(train_tweets, train_genders):
                          ngram_range=(3,5))
 
 
-    gender_stereotypes_vec = Pipeline([
-     ('stereotypes', LinguisticGenderFeatures()),
-     ('vec', DictVectorizer())
-     ])
-
-    combined_feats = FeatureUnion([("vec_word", vec_word), ("vec_char", vec_char), ("vec_stereo", gender_stereotypes_vec)])
+    combined_feats = FeatureUnion([("vec_word", vec_word), ("vec_char", vec_char)])
 
 
 
@@ -249,32 +244,6 @@ def classifyAge(train_tweets, train_ages):
     classifier.fit(train_tweets, train_ages)  
     return classifier
 
-
-class LinguisticGenderFeatures(BaseEstimator, TransformerMixin):
-    def fit(self, x, y=None):
-        return self
-
-    def _get_features(self, doc):
-        counts              = Counter(doc)
-        text_string         = " ".join(doc)
-        pos_tagged_text     = nltk.pos_tag(doc)
-        apologetic_words    = ["sorry", "scusa", "scusi", "colpa", "excuus", "spijt", "siento", "culpa"]
-        tag_questions       = ["right?", "isn't it?", "aren't they?", "verdad?", "toch?", "giusto?", "vero?"]
-        swearwords          = ["shit", "crap", "fuck", "merda", "cazzo", "gvd", "kut", "mierda"]
-        return {
-                    "swearing": len([word for word in swearwords if word in doc])
-                    #"words": len(doc)
-                    # "unique_words": len(set(doc)),
-                    # "adjectives": len([word[1] for word in pos_tagged_text if word[1] == "JJ"]),
-                    # "adverbs": len([word[1] for word in pos_tagged_text if word[1] == "RB"]),
-                    # "exclamation": counts["!"],
-                    # "apologetic_lang": len([word for word in doc if word in apologetic_words]),
-                    # "tag_questions": len([tag for tag in tag_questions if tag in text_string]),
-                    # "questions": counts["?"]}
-                }
-       
-    def transform(self, raw_documents):
-     return [ self._get_features(doc) for doc in raw_documents]
 
 def createLists(documents,part):
     if part == "train":
