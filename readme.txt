@@ -1,5 +1,5 @@
 How to run the program:
-	python3 smv.py [path to training directory] [path to testing directory] [path to gold standard file]
+	python3 smvFinal.py [path to training directory] [path to testing directory] [path to gold standard file]
 	E.g.: python3 svm.py training/english testing/english testing/english/gold.txt
 
 	(if directory with the language name, is not in a overarching directory (like training), please use ./. E.g.: ./englishTraining ./englishTesting)
