@@ -33,8 +33,8 @@ def main():
 
     # trainDocuments, testDocuments = createDocuments(files[:trainingSize],files[trainingSize:],language)
 
-
-    kf = KFold(n_splits=5)
+    agesList = ["18-24","25-34","35-49","50-XX"]
+    kf = KFold(n_splits=5, shuffle=False, random_state=0)
     sumAccGender = 0
     sumAccAge = 0
     sumAccCombined = 0
@@ -51,7 +51,19 @@ def main():
     sumF1Age = 0
     sumF1Combined = 0
 
+    cmGender = np.array([[0,0],[0,0]])
+
+    if language == "english" or language == "spanish":
+        cmAge = np.array([[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]])
+        cmCombined = np.array([[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]])
+    else:
+        cmAge = np.array([[0]])
+        cmCombined = np.array([[0,0,0],[0,0,0],[0,0,0]])
+
+    k = 0
     for train, test in kf.split(files):
+        print(k)
+        k += 1
         trainData = np.array(files)[train]
         testData = np.array(files)[test]
 
@@ -148,7 +160,76 @@ def main():
         f1Age = f1_score(goldAges, predictedAges, average="macro")
         f1Combined = f1_score(goldCombined, predictedCombined, average="macro")
 
-        # classifier = nltk.NaiveBayesClassifier.train(train_tweets)
+        cmGenderNew = confusion_matrix(goldGenders, predictedGenders)
+        cmGender = [x + y for x, y in zip(cmGender, cmGenderNew)] 
+        cmGender = np.asarray(cmGender)
+        # print("\nGender\n", cmGender)
+
+
+        if language == "spanish":
+
+            youngest = cmAge[0] 
+            middleYoung = cmAge[1]
+            middleOld = cmAge[2]
+            oldest = cmAge[3]
+
+            for idx, i in enumerate(predictedAges):
+                if i == "18-24":
+                    if goldAges[idx] == "18-24":
+                        youngest[0] += 1
+                    elif goldAges[idx] == "25-34":
+                        youngest[1] += 1
+                    elif goldAges[idx] == "35-49":
+                        youngest[2] += 1
+                    elif goldAges[idx] == "50-XX":
+                        youngest[3] += 1
+
+                elif i == "25-34":
+                    if goldAges[idx] == "18-24":
+                        middleYoung[0] += 1
+                    elif goldAges[idx] == "25-34":
+                        middleYoung[1] += 1
+                    elif goldAges[idx] == "35-49":
+                        middleYoung[2] += 1
+                    elif goldAges[idx] == "50-XX":
+                        middleYoung[3] += 1
+
+                elif i == "35-49":
+                    if goldAges[idx] == "18-24":
+                        middleOld[0] += 1
+                    elif goldAges[idx] == "25-34":
+                        middleOld[1] += 1
+                    elif goldAges[idx] == "35-49":
+                        middleOld[2] += 1
+                    elif goldAges[idx] == "50-XX":
+                        middleOld[3] += 1
+
+                elif i == "50-XX":
+                    if goldAges[idx] == "18-24":
+                        oldest[0] += 1
+                    elif goldAges[idx] == "25-34":
+                        oldest[1] += 1
+                    elif goldAges[idx] == "35-49":
+                        oldest[2] += 1
+                    elif goldAges[idx] == "50-XX":
+                        oldest[3] += 1
+
+
+            cmAgeNew = np.stack((youngest,middleYoung,middleOld,oldest))
+
+        else:
+            cmAgeNew = confusion_matrix(goldAges, predictedAges)
+
+
+        cmAge = np.asarray(cmAge)
+
+        if language != "spanish":
+            cmCombinedNew = confusion_matrix(goldCombined, predictedCombined)
+            cmCombined = [x + y for x, y in zip(cmCombined, cmCombinedNew)]
+            cmCombined = np.asarray(cmCombined)
+            print("\ncombined\n", cmCombined)
+
+
         sumAccGender += accuracyGender
         sumAccAge += accuracyAge
         sumAccCombined += accuracyCombined
@@ -164,6 +245,7 @@ def main():
         sumF1Gender += f1Gender
         sumF1Age += f1Age
         sumF1Combined += f1Combined
+
 
     averageAccGender = sumAccGender/5
     averageAccAge = sumAccAge/5
@@ -185,6 +267,15 @@ def main():
     print("Avg {:<10s}: acc = {:>.3f} precision = {:>.3f} recall = {:>.3f} f1 = {:>.3f}".format("Age",round(averageAccAge,3),round(averagePrecisionAge,3),round(averageRecallAge,3),round(averagef1Age,3)))
     print("Avg {:<10s}: acc = {:>.3f} precision = {:>.3f} recall = {:>.3f} f1 = {:>.3f}".format("Combined",round(averageAccCombined,3),round(averagePrecisionCombined,3),round(averageRecallCombined,3),round(averagef1Combined,3)))
 
+    print("Confusion Matrix Gender:")
+    createConfusionMatrix(cmGender, "gender", language)
+
+    print("\n\nConfusion Matrix Age:")
+    createConfusionMatrix(cmAge, "age", language)
+
+    if language != "spanish":
+        print("\n\nConfusion Matrix Combined:")
+        createConfusionMatrix(cmCombined, "combined", language)
 
     total_time = time.time() - t0
     print("\ntotal time: ", total_time)
@@ -427,10 +518,11 @@ def createConfusionMatrix(confusionMatrix,part,language):
         if language == "spanish" or language =="english":
             labels = ['18-24','25-34','35-49','50-XX','F','M']
         else:
-            labels = ['XX-XX','F','M']
+            labels = ['F','M','XX-XX']
 
 
-    print("{:10s}".format(""), end="")
+    # print("{:10s}".format(""), end="")
+    print("{:10s}".format("T \ P"), end="")
     [print("{:<8s}".format(item), end="") for item in labels]
     print()
 

@@ -34,6 +34,7 @@ def main():
 
     directorySize = len(files)
     trainingSize = round(0.8*directorySize)
+    print("Number of users: ", directorySize)
 
     trainDocuments, testDocuments = createDocuments(files[:trainingSize],files[trainingSize:],language)
 
@@ -46,13 +47,17 @@ def main():
     train_ids, train_tweets, train_genders, train_ages = createLists(trainDocuments,"train")
     test_ids, test_tweets = createLists(testDocuments,"test")
 
+    print("training tweets ", len(train_ids), "testing tweets ", len(test_ids))
+
     #predict gender
     mostFrequentGender = Counter(train_genders).most_common(1)[0][0]
     print("Most frequent gender = ", mostFrequentGender)
+    print("train gender counter ", Counter(train_genders))
 
     #only predict age 
     mostFrequentAge = Counter(train_ages).most_common(1)[0][0]
     print("Most frequent age = ", mostFrequentAge)
+    print("train ages counter ", Counter(train_ages))
 
 
 
@@ -64,7 +69,12 @@ def main():
     
 
     goldGenders = [i[1] for i in goldFile]
+    print("Gold genders + counter ", goldGenders, Counter(goldGenders))
     goldAges = [i[2] for i in goldFile]
+    print("Gold ages + counter ", goldAges, Counter(goldAges))
+
+    print("counter gold genders + train genders", Counter(goldGenders+train_genders))
+    print("counter gold ages + train ages", Counter(goldAges+train_ages))
     predictedGenders = [mostFrequentGender for i in set(test_ids)]
     predictedAges = [mostFrequentAge for i in set(test_ids)]
     goldCombined = goldGenders + goldAges

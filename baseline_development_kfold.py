@@ -34,7 +34,7 @@ def main():
     # trainDocuments, testDocuments = createDocuments(files[:trainingSize],files[trainingSize:],language)
 
 
-    kf = KFold(n_splits=5)
+    kf = KFold(n_splits=7)
     sumAccGender = 0
     sumAccAge = 0
     sumAccCombined = 0
@@ -69,11 +69,11 @@ def main():
 
         #predict gender
         mostFrequentGender = Counter(train_genders).most_common(1)[0][0]
-        print("Most frequent gender = ", mostFrequentGender)
+        # print("Most frequent gender = ", mostFrequentGender)
 
         #only predict age 
         mostFrequentAge = Counter(train_ages).most_common(1)[0][0]
-        print("Most frequent age = ", mostFrequentAge)
+        # print("Most frequent age = ", mostFrequentAge)
 
         goldFile = open('training/'+language+'/truth.txt',"r+").read().split("\n")
         
