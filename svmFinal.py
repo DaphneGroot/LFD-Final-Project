@@ -113,10 +113,8 @@ def main():
     #Gender
     results(goldGenders,predictedGenders,"gender",language)
 
-
     if "spanish" in language or "english" in language:
         #Age
-        print("age")
         results(goldAges,predictedAges,"age",language)
 
         #Gender+Age
@@ -134,23 +132,12 @@ def results(gold,predicted,part,language):
     f1                = f1_score(gold,predicted,average="macro")
     confusionMatrix   = sklearn.metrics.confusion_matrix(gold, predicted)
 
-    if part == "gender":
-        print("\n\n"+'\033[95m'+"Gender"+'\033[0m'+":\nAccuracy = ", round(accuracy,3),"\n")
+    
+    print("\n\n"+'\033[95m'+part+'\033[0m'+":\nAccuracy = ", round(accuracy,3),"\n")
 
-        labels = ["F","M"]
-
-    elif part == "age":
-        print("\n\n"+'\033[95m'+"Age"+'\033[0m'+":\nAccuracy = ", round(accuracy,3),"\n")
-        labels = ["18-24","25-34","35-49","50-XX"]
-
-    else:
-        print("\n\n"+'\033[95m'+"Combined"+'\033[0m'+":\nAccuracy = ", round(accuracy,3),"\n")
-        labels = ["18-24","25-34","35-49","50-XX","F","M"]
-
-
-
+    labelsGender = ["F","M"]
     print("\t\t {} \t {} \t {}".format("Precision","Recall","F1-score"))
-    for label in labels:
+    for label in labelsGender:
         precisionScore  = sklearn.metrics.precision_score(gold,predicted, average="micro", labels=label)
         recallScore     = sklearn.metrics.recall_score(gold,predicted, average="micro", labels=label)
         f1Score         = sklearn.metrics.f1_score(gold,predicted, average="micro", labels=label)
@@ -163,8 +150,7 @@ def results(gold,predicted,part,language):
     createConfusionMatrix(confusionMatrix, part, language)
 
 
-
-    # return accuracy, precision, recall, f1, confusionMatrix
+    return accuracy, precision, recall, f1, confusionMatrix
 
     
 def identity(x):
@@ -204,7 +190,12 @@ def classifyGender(train_tweets, train_genders):
                          ngram_range=(3,5))
 
 
-    combined_feats = FeatureUnion([("vec_word", vec_word), ("vec_char", vec_char)])
+    gender_stereotypes_vec = Pipeline([
+     ('stereotypes', LinguisticGenderFeatures()),
+     ('vec', DictVectorizer())
+     ])
+
+    combined_feats = FeatureUnion([("vec_word", vec_word), ("vec_char", vec_char), ("vec_stereo", gender_stereotypes_vec)])
 
 
 
@@ -244,6 +235,32 @@ def classifyAge(train_tweets, train_ages):
     classifier.fit(train_tweets, train_ages)  
     return classifier
 
+
+class LinguisticGenderFeatures(BaseEstimator, TransformerMixin):
+    def fit(self, x, y=None):
+        return self
+
+    def _get_features(self, doc):
+        counts              = Counter(doc)
+        text_string         = " ".join(doc)
+        pos_tagged_text     = nltk.pos_tag(doc)
+        apologetic_words    = ["sorry", "scusa", "scusi", "colpa", "excuus", "spijt", "siento", "culpa"]
+        tag_questions       = ["right?", "isn't it?", "aren't they?", "verdad?", "toch?", "giusto?", "vero?"]
+        swearwords          = ["shit", "crap", "fuck", "merda", "cazzo", "gvd", "kut", "mierda"]
+        return {
+                    "swearing": len([word for word in swearwords if word in doc])
+                    #"words": len(doc)
+                    # "unique_words": len(set(doc)),
+                    # "adjectives": len([word[1] for word in pos_tagged_text if word[1] == "JJ"]),
+                    # "adverbs": len([word[1] for word in pos_tagged_text if word[1] == "RB"]),
+                    # "exclamation": counts["!"],
+                    # "apologetic_lang": len([word for word in doc if word in apologetic_words]),
+                    # "tag_questions": len([tag for tag in tag_questions if tag in text_string]),
+                    # "questions": counts["?"]}
+                }
+       
+    def transform(self, raw_documents):
+     return [ self._get_features(doc) for doc in raw_documents]
 
 def createLists(documents,part):
     if part == "train":
